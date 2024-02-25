@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JSP - Hello World</title>
+    <title>ChatApp - Join Server</title>
 </head>
 <body>
 <h1><%= "Hello World!" %>
