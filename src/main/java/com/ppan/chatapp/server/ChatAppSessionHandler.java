@@ -1,24 +1,26 @@
 package com.ppan.chatapp.server;
 
 import com.ppan.chatapp.model.User;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.Session;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@ApplicationScoped
 public class ChatAppSessionHandler {
-    private Set<Session> sessions;
-    private Set<User> users;
+    private final Set<Session> sessions;
+    private final Map<String, User> userSessionMap;
+    private final Set<String> usernames;
 
     public ChatAppSessionHandler() {
         sessions = Collections.synchronizedSet(new HashSet<>());
-        users = Collections.synchronizedSet(new HashSet<>());
+        userSessionMap = Collections.synchronizedMap(new HashMap<>());
+        usernames = Collections.synchronizedSet(new HashSet<>());
     }
 
     public void addSession(Session session) {
@@ -29,22 +31,28 @@ public class ChatAppSessionHandler {
         sessions.remove(session);
     }
 
-    public void addUser(User user) {
-        users.add(user);
+    public void addUser(String sessionId, User user) {
+        userSessionMap.put(sessionId, user);
+        usernames.add(user.getUsername());
     }
 
-    public void removeUser(Session session) {
-        sessions.remove(session);
+    public void removeUser(String sessionId) {
+        User user = userSessionMap.get(sessionId);
+        if (user != null) {
+            usernames.remove(user.getUsername());
+            userSessionMap.remove(sessionId);
+        }
+    }
+
+    public boolean usernameExists(String username) {
+        return usernames.contains(username);
+    }
+
+    public String getUsernameForId(String id) {
+        return userSessionMap.get(id).getUsername();
     }
 
     public void sendMsgToAll(String msg) {
-        sessions.forEach(session -> {
-            try {
-                session.getBasicRemote().sendText(msg);
-            } catch (IOException e) {
-                Logger.getLogger(ChatAppSessionHandler.class.getName())
-                        .log(Level.SEVERE, "Exception while message broadcast");
-            }
-        });
+        sessions.forEach(session -> ChatAppServer.sendMsg(session, msg));
     }
 }

@@ -1,7 +1,7 @@
 package com.ppan.chatapp.server;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import com.ppan.chatapp.model.User;
+import com.ppan.chatapp.utils.Constants;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
@@ -10,23 +10,38 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import org.bson.BasicBSONObject;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@ApplicationScoped
 @ServerEndpoint("/webapp-server")
 public class ChatAppServer {
-    @Inject
-    private ChatAppSessionHandler sessionHandler;
+    private final ChatAppSessionHandler sessionHandler = new ChatAppSessionHandler();
 
     @OnOpen
     public void open(Session session) {
-        sessionHandler.addSession(session);
+        Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, session.getId() + " joined!");
+        String username = session.getPathParameters().get("username");
+        if (username == null) {
+            sendMsg(session, "username is required");
+            closeSession(session);
+        } else {
+            if (!sessionHandler.usernameExists(username)) {
+                String sessionId = session.getId();
+                sessionHandler.addSession(session);
+                sessionHandler.addUser(sessionId, new User(sessionId, username));
+            } else {
+                sendMsg(session, "username already exists");
+                closeSession(session);
+            }
+        }
     }
 
     @OnClose
     public void close(Session session) {
+        Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, session.getId() + " left!");
         sessionHandler.removeSession(session);
+        sessionHandler.removeUser(session.getId());
     }
 
     @OnError
@@ -37,11 +52,31 @@ public class ChatAppServer {
 
     @OnMessage
     public void handleMessage(String message, Session session) {
-        String serializedMsg = new BasicBSONObject("sender", session.getId()).append("msg", message).toString();
+        String serializedMsg = new BasicBSONObject(Constants.SENDER_KEY, sessionHandler.getUsernameForId(session.getId()))
+                .append(Constants.MSG_KEY, message).toString();
+        Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, String.format("%s says \"%s\"", session.getId(), serializedMsg));
         broadcastMsgToAll(serializedMsg);
     }
 
     private void broadcastMsgToAll(String message) {
         sessionHandler.sendMsgToAll(message);
+    }
+
+    public static void sendMsg(Session session, String msg) {
+        try {
+            session.getBasicRemote().sendText(msg);
+        } catch (IOException e) {
+            Logger.getLogger(ChatAppServer.class.getName())
+                    .log(Level.SEVERE, "Exception while sending message");
+        }
+    }
+
+    public void closeSession(Session session) {
+        try {
+            session.close();
+        } catch (IOException e) {
+            Logger.getLogger(ChatAppServer.class.getName())
+                    .log(Level.SEVERE, "Exception while closing session. sessionId: {}", session.getId());
+        }
     }
 }
