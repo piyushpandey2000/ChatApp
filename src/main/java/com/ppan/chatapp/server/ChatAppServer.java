@@ -1,5 +1,6 @@
 package com.ppan.chatapp.server;
 
+import com.mongodb.BasicDBObject;
 import com.ppan.chatapp.model.User;
 import com.ppan.chatapp.utils.Constants;
 import jakarta.websocket.OnError;
@@ -8,7 +9,6 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
-import org.bson.BasicBSONObject;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -20,8 +20,9 @@ public class ChatAppServer {
 
     @OnOpen
     public void open(Session session) {
+        Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, session.getRequestURI().toString());
         Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, session.getId() + " joined!");
-        String username = session.getPathParameters().get("username");
+        String username = session.getRequestParameterMap().get("username").get(0);
         if (username == null) {
             sendMsg(session, "username is required");
             closeSession(session);
@@ -52,7 +53,7 @@ public class ChatAppServer {
 
     @OnMessage
     public void handleMessage(String message, Session session) {
-        String serializedMsg = new BasicBSONObject(Constants.SENDER_KEY, sessionHandler.getUsernameForId(session.getId()))
+        String serializedMsg = new BasicDBObject(Constants.SENDER_KEY, sessionHandler.getUsernameForId(session.getId()))
                 .append(Constants.MSG_KEY, message).toString();
         Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, String.format("%s says \"%s\"", session.getId(), serializedMsg));
         broadcastMsgToAll(serializedMsg);
