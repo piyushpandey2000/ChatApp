@@ -79,15 +79,54 @@
     .msg-others {
       background-color: #484848;
     }
+    .join-page, .join {
+      color: white;
+      font-family: "Roboto", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Vertical centering */
+      justify-content: center; /* Horizontal centering */
+      height: 100vh;
+    }
+    button {
+      background-color: #343541;
+      margin: 1vh;
+      padding: 1vh 4vh 1vh 4vh;
+      border: 1px solid rgb(86, 86, 86);
+      color: white;
+      border-radius: 0.5rem;
+    }
+    button:hover {
+      background-color: #02634b;
+    }
+    input {
+      margin: 1vh;
+      padding: 1vh 4vh 1vh 4vh;
+      background-color: #343541;
+      border: 1px solid rgb(86, 86, 86);
+      color: white;
+      resize: none;
+      font-family: "Roboto", sans-serif;
+      text-align: center;
+    }
+    input:focus {
+      outline: none;
+    }
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat Application</title>
 </head>
 <script>
-  function initSocket() {
+  function joinSession() {
+    const username = document.getElementById("username-input").innerText;
+    initSocket(username);
+  }
+
+  function initSocket(username) {
     const outputDiv = document.getElementById("output");
-    const socket = new WebSocket("ws://localhost:8080/logging_interface_war_exploded/webapp-server")
+    outputDiv.innerHTML = "";
+    const socket = new WebSocket("ws://localhost:8080/logging_interface_war_exploded/webapp-server?username=" + username)
 
     socket.onmessage = (event) => {
       const msgObj = JSON.parse(event.data);
@@ -110,9 +149,17 @@
     };
   }
 </script>
-<body onload="initSocket()">
+<body>
 <div class="container">
-  <div class="sidebar"></div>
+  <div class="sidebar">
+    <div class="join-page">
+      <div class="join">
+        Enter a username <br>
+        <input id="username-input" type="text"> <br>
+        <button>Join</button>
+      </div>
+    </div>
+  </div>
   <div class="main">
     <div class="output" id="output">
       <div class="msg msg-my">This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind</div>
