@@ -119,17 +119,19 @@
 </head>
 <script>
   let socket;
+  let username;
 
   function joinSession() {
-    const username = document.getElementById("username-input").value;
-    console.log("username at join: " + username);
-    initSocket(username);
+    const uname = document.getElementById("username-input").value;
+    console.log("username at join: " + uname);
+    username = uname;
+    initSocket(uname);
   }
 
-  function initSocket(username) {
+  function initSocket(uname) {
     const outputDiv = document.getElementById("output");
     outputDiv.innerHTML = "";
-    socket = new WebSocket("ws://localhost:8080/chatapp_war_exploded/webapp-server?username=" + username)
+    socket = new WebSocket("ws://localhost:8080/chatapp_war_exploded/webapp-server?username=" + uname)
 
     socket.onmessage = (event) => {
       const msgObj = JSON.parse(event.data);
@@ -137,7 +139,7 @@
       const msg = msgObj["<%= Constants.MSG_KEY %>"];
 
       const newDiv = document.createElement("div");
-      newDiv.className = "msg";
+      newDiv.className = "msg" + sender === username ? "msg-my" : "msg-others";
       newDiv.innerHTML = "<b>" + sender + "</b><br>" + msg;
 
       outputDiv.appendChild(newDiv);
