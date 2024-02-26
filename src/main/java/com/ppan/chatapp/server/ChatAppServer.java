@@ -16,8 +16,6 @@ import java.util.logging.Logger;
 
 @ServerEndpoint("/webapp-server")
 public class ChatAppServer {
-    private final ChatAppSessionHandler sessionHandler = new ChatAppSessionHandler();
-
     @OnOpen
     public void open(Session session) {
         Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, session.getRequestURI().toString());
@@ -27,10 +25,10 @@ public class ChatAppServer {
             sendMsg(session, "username is required");
             closeSession(session);
         } else {
-            if (!sessionHandler.usernameExists(username)) {
+            if (!ChatAppSessionHandler.getInstance().usernameExists(username)) {
                 String sessionId = session.getId();
-                sessionHandler.addSession(session);
-                sessionHandler.addUser(sessionId, new User(sessionId, username));
+                ChatAppSessionHandler.getInstance().addSession(session);
+                ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
             } else {
                 sendMsg(session, "username already exists");
                 closeSession(session);
@@ -41,8 +39,8 @@ public class ChatAppServer {
     @OnClose
     public void close(Session session) {
         Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, session.getId() + " left!");
-        sessionHandler.removeSession(session);
-        sessionHandler.removeUser(session.getId());
+        ChatAppSessionHandler.getInstance().removeSession(session);
+        ChatAppSessionHandler.getInstance().removeUser(session.getId());
     }
 
     @OnError
@@ -53,14 +51,14 @@ public class ChatAppServer {
 
     @OnMessage
     public void handleMessage(String message, Session session) {
-        String serializedMsg = new BasicDBObject(Constants.SENDER_KEY, sessionHandler.getUsernameForId(session.getId()))
+        String serializedMsg = new BasicDBObject(Constants.SENDER_KEY, ChatAppSessionHandler.getInstance().getUsernameForId(session.getId()))
                 .append(Constants.MSG_KEY, message).toString();
         Logger.getLogger(ChatAppServer.class.getName()).log(Level.INFO, String.format("%s says \"%s\"", session.getId(), serializedMsg));
         broadcastMsgToAll(serializedMsg);
     }
 
     private void broadcastMsgToAll(String message) {
-        sessionHandler.sendMsgToAll(message);
+        ChatAppSessionHandler.getInstance().sendMsgToAll(message);
     }
 
     public static void sendMsg(Session session, String msg) {

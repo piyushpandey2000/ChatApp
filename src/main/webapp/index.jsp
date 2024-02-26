@@ -138,8 +138,12 @@
       const sender = msgObj["<%= Constants.SENDER_KEY %>"];
       const msg = msgObj["<%= Constants.MSG_KEY %>"];
 
+      console.log(sender);
+      console.log(sender === username);
+      console.log("msg " + (sender === username ? "msg-my" : "msg-others"));
+
       const newDiv = document.createElement("div");
-      newDiv.className = "msg" + sender === username ? "msg-my" : "msg-others";
+      newDiv.className = "msg " + (sender === username ? "msg-my" : "msg-others");
       newDiv.innerHTML = "<b>" + sender + "</b><br>" + msg;
 
       outputDiv.appendChild(newDiv);

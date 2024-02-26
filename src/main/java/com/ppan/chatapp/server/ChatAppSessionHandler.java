@@ -2,25 +2,25 @@ package com.ppan.chatapp.server;
 
 import com.ppan.chatapp.model.User;
 import jakarta.websocket.Session;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChatAppSessionHandler {
-    private final Set<Session> sessions;
-    private final Map<String, User> userSessionMap;
-    private final Set<String> usernames;
+    private final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
+    private final Map<String, User> userSessionMap = Collections.synchronizedMap(new HashMap<>());
+    private final Set<String> usernames = Collections.synchronizedSet(new HashSet<>());
 
-    public ChatAppSessionHandler() {
-        sessions = Collections.synchronizedSet(new HashSet<>());
-        userSessionMap = Collections.synchronizedMap(new HashMap<>());
-        usernames = Collections.synchronizedSet(new HashSet<>());
+    private static final ChatAppSessionHandler instance = new ChatAppSessionHandler();
+
+    public static ChatAppSessionHandler getInstance() {
+        return instance;
     }
 
     public void addSession(Session session) {
