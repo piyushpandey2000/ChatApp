@@ -28,7 +28,7 @@ public class ChatAppServer {
                 String sessionId = session.getId();
                 ChatAppSessionHandler.getInstance().addSession(session);
                 ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
-                broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " joined");
+                broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " joined", MessageType.INFO);
             } else {
                 sendErrorMsg(session, "Username already exists!");
                 closeSession(session);
@@ -39,10 +39,9 @@ public class ChatAppServer {
     @OnClose
     public void close(Session session) {
         String username = ChatAppSessionHandler.getInstance().getUsernameForId(session.getId());
-        sendInfoMsg(session, "Disconnected");
         ChatAppSessionHandler.getInstance().removeSession(session);
         ChatAppSessionHandler.getInstance().removeUser(session.getId());
-        broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " left");
+        broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " left", MessageType.INFO);
     }
 
     @OnError
@@ -54,25 +53,19 @@ public class ChatAppServer {
     @OnMessage
     public void handleMessage(String message, Session session) {
         String username = ChatAppSessionHandler.getInstance().getUsernameForId(session.getId());
-        broadcastMsgToAll(username, message);
+        broadcastMsgToAll(username, message, MessageType.MESSAGE);
     }
 
-    private void broadcastMsgToAll(String sender, String message) {
+    private void broadcastMsgToAll(String sender, String message, MessageType type) {
         String serializedMsg = new BasicDBObject(Constants.SENDER_KEY, sender)
                 .append(Constants.MSG_KEY, message)
-                .append(Constants.MSG_TYPE_KEY, MessageType.MESSAGE).toString();
+                .append(Constants.MSG_TYPE_KEY, type.name()).toString();
         ChatAppSessionHandler.getInstance().sendMsgToAll(serializedMsg);
     }
 
     private void sendErrorMsg(Session session, String msg) {
         String serializedMsg = new BasicDBObject(Constants.MSG_KEY, msg)
-                .append(Constants.MSG_TYPE_KEY, MessageType.ERROR).toString();
-        sendMsg(session, serializedMsg);
-    }
-
-    private void sendInfoMsg(Session session, String msg) {
-        String serializedMsg = new BasicDBObject(Constants.MSG_KEY, msg)
-                .append(Constants.MSG_TYPE_KEY, MessageType.INFO).toString();
+                .append(Constants.MSG_TYPE_KEY, MessageType.ERROR.name()).toString();
         sendMsg(session, serializedMsg);
     }
 

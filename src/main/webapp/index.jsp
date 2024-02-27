@@ -5,7 +5,7 @@
   Time: 4:16 pm
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,6 +71,7 @@
       align-self: flex-start;
       color: rgba(255, 255, 255, 0.655);
       font: 0.9em sans-serif;
+      min-width: 25%;
     }
     .msg-my {
       align-self: flex-end;
@@ -112,6 +113,18 @@
     input:focus {
       outline: none;
     }
+    .msg-sys {
+      align-self: center;
+      text-align: center;
+      border-radius: 1rem;
+      border: 1px solid rgb(86, 86, 86);
+      min-width: 0%;
+      padding-left: 3%;
+      padding-right: 3%;
+    }
+    .msg-error {
+      background-color: rgba(189, 0, 0, 0.378);
+    }
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -137,14 +150,28 @@
       const msgObj = JSON.parse(event.data);
       const sender = msgObj["<%= Constants.SENDER_KEY %>"];
       const msg = msgObj["<%= Constants.MSG_KEY %>"];
+      const msgType = msgObj["<%= Constants.MSG_TYPE_KEY %>"];
 
-      console.log(sender);
-      console.log(sender === username);
-      console.log("msg " + (sender === username ? "msg-my" : "msg-others"));
+      let className = "msg";
+      let innerHTML = "";
+
+      switch (msgType) {
+        case "<%= Constants.MessageType.MESSAGE.name() %>":
+          className += sender === username ? " msg-my" : " msg-others";
+          innerHTML = "<b>" + sender + "</b><br>" + msg;
+          break;
+        case "<%= Constants.MessageType.ERROR.name() %>":
+          className += " msg-error";
+        case "<%= Constants.MessageType.INFO.name() %>":
+          className += " msg-sys";
+          innerHTML = msg;
+          break;
+        default:
+      }
 
       const newDiv = document.createElement("div");
-      newDiv.className = "msg " + (sender === username ? "msg-my" : "msg-others");
-      newDiv.innerHTML = "<b>" + sender + "</b><br>" + msg;
+      newDiv.className = className;
+      newDiv.innerHTML = innerHTML;
 
       outputDiv.appendChild(newDiv);
     };
