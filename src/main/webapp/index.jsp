@@ -204,21 +204,6 @@
   </div>
   <div class="main">
     <div class="output" id="output">
-      <div class="msg msg-my">This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-my">This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-my">This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-my">This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-my">This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind This message was written by me pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
-      <div class="msg msg-others">This message was written by others pls bear in mind This message was written by others pls bear in mind This message was written by others pls bear in mind</div>
     </div>
     <div class="input">
                 <textarea class="input-text" id="input-text" placeholder="Type a message...">
