@@ -26,9 +26,11 @@ public class ChatAppServer {
         } else {
             if (!ChatAppSessionHandler.getInstance().usernameExists(username)) {
                 String sessionId = session.getId();
+                broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " joined", MessageType.INFO);
+
                 ChatAppSessionHandler.getInstance().addSession(session);
                 ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
-                broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " joined", MessageType.INFO);
+                sendDataMsg(session, new BasicDBObject(Constants.ONLINE_USERS, ChatAppSessionHandler.getInstance().getUsernames()).toString());
             } else {
                 sendErrorMsg(session, "Username already exists!");
                 closeSession(session);
@@ -66,6 +68,12 @@ public class ChatAppServer {
     private void sendErrorMsg(Session session, String msg) {
         String serializedMsg = new BasicDBObject(Constants.MSG_KEY, msg)
                 .append(Constants.MSG_TYPE_KEY, MessageType.ERROR.name()).toString();
+        sendMsg(session, serializedMsg);
+    }
+
+    private void sendDataMsg(Session session, String msg) {
+        String serializedMsg = new BasicDBObject(Constants.MSG_KEY, msg)
+                .append(Constants.MSG_TYPE_KEY, MessageType.DATA.name()).toString();
         sendMsg(session, serializedMsg);
     }
 
