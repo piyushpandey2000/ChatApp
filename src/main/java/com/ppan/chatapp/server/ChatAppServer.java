@@ -12,6 +12,7 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +31,7 @@ public class ChatAppServer {
 
                 ChatAppSessionHandler.getInstance().addSession(session);
                 ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
-                sendDataMsg(session, new BasicDBObject(Constants.ONLINE_USERS, ChatAppSessionHandler.getInstance().getUsernames()).toString());
+                sendOnlineUsers(session, ChatAppSessionHandler.getInstance().getUsernames());
             } else {
                 sendErrorMsg(session, "Username already exists!");
                 closeSession(session);
@@ -71,8 +72,8 @@ public class ChatAppServer {
         sendMsg(session, serializedMsg);
     }
 
-    private void sendDataMsg(Session session, String msg) {
-        String serializedMsg = new BasicDBObject(Constants.MSG_KEY, msg)
+    private void sendOnlineUsers(Session session, Set<String> msg) {
+        String serializedMsg = new BasicDBObject(Constants.ONLINE_USERS, msg)
                 .append(Constants.MSG_TYPE_KEY, MessageType.DATA.name()).toString();
         sendMsg(session, serializedMsg);
     }
