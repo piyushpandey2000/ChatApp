@@ -3,6 +3,7 @@ package com.ppan.chatapp.server;
 import com.ppan.chatapp.model.User;
 import jakarta.websocket.Session;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.Set;
 public class ChatAppSessionHandler {
     private final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
     private final Map<String, User> userSessionMap = Collections.synchronizedMap(new HashMap<>());
+    @Getter
     private final Set<String> usernames = Collections.synchronizedSet(new HashSet<>());
 
     private static final ChatAppSessionHandler instance = new ChatAppSessionHandler();

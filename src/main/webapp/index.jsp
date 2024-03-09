@@ -15,6 +15,7 @@
       padding: 0;
       height: 100%;
       background-color: #343541;
+      font-family: "Roboto", sans-serif;
     }
     .container {
       display: flex;
@@ -125,6 +126,29 @@
     .msg-error {
       background-color: rgba(189, 0, 0, 0.378);
     }
+    .users-header {
+      height: 5vh;
+      font-family: "Roboto", sans-serif;
+      text-align: center;
+      margin-top: 2vh;
+      border-bottom: 1px solid rgb(86, 86, 86);
+      color: rgba(255, 255, 255, 0.655);
+    }
+    .users-list {
+      display: flex;
+      flex-direction: column;
+      overflow-y: scroll;
+    }
+    .users-col {
+      max-width: 30vh;
+      overflow-y: hidden;
+      overflow-x: scroll;
+      padding-top: 2vh;
+      padding-left: 20px;
+      height: 3vh;
+      align-self: flex-start;
+      color: rgba(255, 255, 255, 0.655);
+    }
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -136,7 +160,6 @@
 
   function joinSession() {
     const uname = document.getElementById("username-input").value;
-    console.log("username at join: " + uname);
     username = uname;
     initSocket(uname);
   }
@@ -148,32 +171,44 @@
 
     socket.onmessage = (event) => {
       const msgObj = JSON.parse(event.data);
-      const sender = msgObj["<%= Constants.SENDER_KEY %>"];
-      const msg = msgObj["<%= Constants.MSG_KEY %>"];
       const msgType = msgObj["<%= Constants.MSG_TYPE_KEY %>"];
 
-      let className = "msg";
-      let innerHTML = "";
+      if(msgType === "<%= Constants.MessageType.DATA.name() %>") {
+        const users = msgObj["<%= Constants.ONLINE_USERS %>"];
+        const usersListDiv = document.getElementById("users-list");
+        users.forEach((user) => {
+          const userDiv = document.createElement("div");
+          userDiv.className = "users-col"
+          userDiv.innerHTML = user + "  🟢";
+          usersListDiv.appendChild(userDiv);
+        });
+      } else {
+        const sender = msgObj["<%= Constants.SENDER_KEY %>"];
+        const msg = msgObj["<%= Constants.MSG_KEY %>"];
 
-      switch (msgType) {
-        case "<%= Constants.MessageType.MESSAGE.name() %>":
-          className += sender === username ? " msg-my" : " msg-others";
-          innerHTML = "<b>" + sender + "</b><br>" + msg;
-          break;
-        case "<%= Constants.MessageType.ERROR.name() %>":
-          className += " msg-error";
-        case "<%= Constants.MessageType.INFO.name() %>":
-          className += " msg-sys";
-          innerHTML = msg;
-          break;
-        default:
+        let className = "msg";
+        let innerHTML = "";
+
+        switch (msgType) {
+          case "<%= Constants.MessageType.MESSAGE.name() %>":
+            className += sender === username ? " msg-my" : " msg-others";
+            innerHTML = "<b>" + sender + "</b><br>" + msg;
+            break;
+          case "<%= Constants.MessageType.ERROR.name() %>":
+            className += " msg-error";
+          case "<%= Constants.MessageType.INFO.name() %>":
+            className += " msg-sys";
+            innerHTML = msg;
+            break;
+          default:
+        }
+
+        const newDiv = document.createElement("div");
+        newDiv.className = className;
+        newDiv.innerHTML = innerHTML;
+
+        outputDiv.appendChild(newDiv);
       }
-
-      const newDiv = document.createElement("div");
-      newDiv.className = className;
-      newDiv.innerHTML = innerHTML;
-
-      outputDiv.appendChild(newDiv);
     };
 
     socket.onerror = (event) => {
@@ -187,7 +222,6 @@
 
   function sendMessage() {
     const message = document.getElementById("input-text").value;
-    console.log("message: " + message);
     socket.send(message);
   }
 </script>
@@ -211,7 +245,15 @@
       <button class="input-button" id="send-button" onclick="sendMessage()">Send</button>
     </div>
   </div>
-  <div class="sidebar"></div>
+  <div class="sidebar">
+    <div class="users-header">
+      <b>Online</b>
+    </div>
+    <div class="users-main">
+      <div class="users-list" id="users-list">
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 </html>
