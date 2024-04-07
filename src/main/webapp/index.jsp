@@ -166,10 +166,12 @@
 
   function initSocket(uname) {
     const outputDiv = document.getElementById("output");
+    const usersListDiv = document.getElementById("users-list");
+
     outputDiv.innerHTML = "";
     socket = new WebSocket("ws://localhost:8080/chatapp_war_exploded/webapp-server?username=" + uname)
 
-    function addUserToOnline(usersListDiv, user) {
+    function addUserToOnline(user) {
       const userDiv = document.createElement("div");
       userDiv.className = "users-col";
       userDiv.id = "id-" + user;
@@ -177,20 +179,19 @@
       usersListDiv.appendChild(userDiv);
     }
 
-    function removeUserFromOnline(usersListDiv, user) {
-      const userDiv = usersListDiv.getElementById("id-" + user);
+    function removeUserFromOnline(user) {
+      const userDiv = document.getElementById("id-" + user);
       usersListDiv.removeChild(userDiv);
     }
 
     socket.onmessage = (event) => {
       const msgObj = JSON.parse(event.data);
       const msgType = msgObj["<%= Constants.MSG_TYPE_KEY %>"];
-      const usersListDiv = document.getElementById("users-list");
 
       if(msgType === "<%= Constants.MessageType.DATA.name() %>") {
         const users = msgObj["<%= Constants.ONLINE_USERS %>"];
         users.forEach((user) => {
-          addUserToOnline(usersListDiv, user);
+          addUserToOnline(user);
         });
       } else {
         const sender = msgObj["<%= Constants.SENDER_KEY %>"];
@@ -207,12 +208,12 @@
           case "<%= Constants.MessageType.ERROR.name() %>":
             className += " msg-error";
           case "<%= Constants.MessageType.JOINED.name() %>":
-            addUserToOnline(usersListDiv, sender);
+            addUserToOnline(sender);
             className += " msg-sys";
             innerHTML = msg;
             break;
           case "<%= Constants.MessageType.LEFT.name() %>":
-            removeUserFromOnline(usersListDiv, sender);
+            removeUserFromOnline(sender);
             className += " msg-sys";
             innerHTML = msg;
             break;
