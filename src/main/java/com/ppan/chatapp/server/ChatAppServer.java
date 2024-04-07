@@ -27,7 +27,7 @@ public class ChatAppServer {
         } else {
             if (!ChatAppSessionHandler.getInstance().usernameExists(username)) {
                 String sessionId = session.getId();
-                broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " joined", MessageType.INFO);
+                broadcastMsgToAll(username, null, MessageType.JOINED);
 
                 ChatAppSessionHandler.getInstance().addSession(session);
                 ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
@@ -44,7 +44,7 @@ public class ChatAppServer {
         String username = ChatAppSessionHandler.getInstance().getUsernameForId(session.getId());
         ChatAppSessionHandler.getInstance().removeSession(session);
         ChatAppSessionHandler.getInstance().removeUser(session.getId());
-        broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " left", MessageType.INFO);
+        broadcastMsgToAll(username, null, MessageType.LEFT);
     }
 
     @OnError
@@ -60,10 +60,11 @@ public class ChatAppServer {
     }
 
     private void broadcastMsgToAll(String sender, String message, MessageType type) {
-        String serializedMsg = new BasicDBObject(Constants.SENDER_KEY, sender)
-                .append(Constants.MSG_KEY, message)
-                .append(Constants.MSG_TYPE_KEY, type.name()).toString();
-        ChatAppSessionHandler.getInstance().sendMsgToAll(serializedMsg);
+        BasicDBObject serializedMsg = new BasicDBObject(Constants.SENDER_KEY, sender)
+                .append(Constants.MSG_TYPE_KEY, type.name());
+        serializedMsg.put(Constants.MSG_KEY, message);
+
+        ChatAppSessionHandler.getInstance().sendMsgToAll(serializedMsg.toString());
     }
 
     private void sendErrorMsg(Session session, String msg) {

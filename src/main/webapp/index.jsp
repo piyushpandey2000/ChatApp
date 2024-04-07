@@ -166,8 +166,23 @@
 
   function initSocket(uname) {
     const outputDiv = document.getElementById("output");
+    const usersListDiv = document.getElementById("users-list");
+
     outputDiv.innerHTML = "";
     socket = new WebSocket("ws://localhost:8080/chatapp_war_exploded/webapp-server?username=" + uname)
+
+    function addUserToOnline(user) {
+      const userDiv = document.createElement("div");
+      userDiv.className = "users-col";
+      userDiv.id = "id-" + user;
+      userDiv.innerHTML = user + "  🟢";
+      usersListDiv.appendChild(userDiv);
+    }
+
+    function removeUserFromOnline(user) {
+      const userDiv = document.getElementById("id-" + user);
+      usersListDiv.removeChild(userDiv);
+    }
 
     socket.onmessage = (event) => {
       const msgObj = JSON.parse(event.data);
@@ -175,12 +190,8 @@
 
       if(msgType === "<%= Constants.MessageType.DATA.name() %>") {
         const users = msgObj["<%= Constants.ONLINE_USERS %>"];
-        const usersListDiv = document.getElementById("users-list");
         users.forEach((user) => {
-          const userDiv = document.createElement("div");
-          userDiv.className = "users-col"
-          userDiv.innerHTML = user + "  🟢";
-          usersListDiv.appendChild(userDiv);
+          addUserToOnline(user);
         });
       } else {
         const sender = msgObj["<%= Constants.SENDER_KEY %>"];
@@ -196,9 +207,15 @@
             break;
           case "<%= Constants.MessageType.ERROR.name() %>":
             className += " msg-error";
-          case "<%= Constants.MessageType.INFO.name() %>":
+          case "<%= Constants.MessageType.JOINED.name() %>":
+            addUserToOnline(sender);
             className += " msg-sys";
-            innerHTML = msg;
+            innerHTML = sender + " joined";
+            break;
+          case "<%= Constants.MessageType.LEFT.name() %>":
+            removeUserFromOnline(sender);
+            className += " msg-sys";
+            innerHTML = sender + " left";
             break;
           default:
         }
