@@ -27,7 +27,7 @@ public class ChatAppServer {
         } else {
             if (!ChatAppSessionHandler.getInstance().usernameExists(username)) {
                 String sessionId = session.getId();
-                broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " joined", MessageType.INFO);
+                broadcastMsgToAll(username, username + " joined", MessageType.JOINED);
 
                 ChatAppSessionHandler.getInstance().addSession(session);
                 ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
@@ -44,7 +44,7 @@ public class ChatAppServer {
         String username = ChatAppSessionHandler.getInstance().getUsernameForId(session.getId());
         ChatAppSessionHandler.getInstance().removeSession(session);
         ChatAppSessionHandler.getInstance().removeUser(session.getId());
-        broadcastMsgToAll(Constants.SYSTEM_USERNAME, username + " left", MessageType.INFO);
+        broadcastMsgToAll(username, username + " left", MessageType.LEFT);
     }
 
     @OnError

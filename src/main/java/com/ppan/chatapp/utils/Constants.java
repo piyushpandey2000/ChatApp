@@ -8,13 +8,13 @@ public class Constants {
     public static final String SENDER_KEY = "sender";
     public static final String MSG_KEY = "msg";
     public static final String MSG_TYPE_KEY = "mType";
-    public static final String SYSTEM_USERNAME = "system";
     public static final String ONLINE_USERS = "onlineUsers";
 
     public enum MessageType {
         MESSAGE,
-        INFO,
         ERROR,
-        DATA
+        DATA,
+        JOINED,
+        LEFT
     }
 }
