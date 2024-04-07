@@ -210,12 +210,12 @@
           case "<%= Constants.MessageType.JOINED.name() %>":
             addUserToOnline(sender);
             className += " msg-sys";
-            innerHTML = msg;
+            innerHTML = sender + " joined";
             break;
           case "<%= Constants.MessageType.LEFT.name() %>":
             removeUserFromOnline(sender);
             className += " msg-sys";
-            innerHTML = msg;
+            innerHTML = sender + " left";
             break;
           default:
         }
