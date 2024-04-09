@@ -2,9 +2,7 @@ package com.ppan.chatapp.server;
 
 import com.ppan.chatapp.model.User;
 import jakarta.websocket.Session;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,17 +10,21 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ChatAppSessionHandler {
-    private final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
-    private final Map<String, User> userSessionMap = Collections.synchronizedMap(new HashMap<>());
+public class ChatRoom {
+    private final String roomKey;
+    private final String creator;
+
+    private final Set<Session> sessions;
+    private final Map<String, User> userSessionMap;
     @Getter
-    private final Set<String> usernames = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String> usernames;
 
-    private static final ChatAppSessionHandler instance = new ChatAppSessionHandler();
-
-    public static ChatAppSessionHandler getInstance() {
-        return instance;
+    public ChatRoom(String roomKey, String creator) {
+        this.roomKey = roomKey;
+        this.creator = creator;
+        this.sessions = Collections.synchronizedSet(new HashSet<>());
+        this.userSessionMap = Collections.synchronizedMap(new HashMap<>());
+        this.usernames = Collections.synchronizedSet(new HashSet<>());
     }
 
     public void addSession(Session session) {
@@ -56,5 +58,15 @@ public class ChatAppSessionHandler {
 
     public void sendMsgToAll(String msg) {
         sessions.forEach(session -> ChatAppServer.sendMsg(session, msg));
+    }
+
+    public void closeAll() {
+        for (Session session : sessions) {
+            ChatAppServer.closeSession(session);
+        }
+    }
+
+    public int getUserCount() {
+        return usernames.size();
     }
 }
