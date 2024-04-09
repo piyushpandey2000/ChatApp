@@ -18,35 +18,43 @@ import java.util.logging.Logger;
 
 @ServerEndpoint("/webapp-server")
 public class ChatAppServer {
-    private final ChatAppSessionHandler handler = new ChatAppSessionHandler();
+    private ChatRoom handler;
 
     @OnOpen
     public void open(Session session) {
         String username = session.getRequestParameterMap().get("username").get(0);
-        if (username == null) {
-            sendErrorMsg(session, "Username is required");
+        String roomKey = session.getRequestParameterMap().get("roomKey").get(0);
+
+        if (username == null || roomKey == null) {
+            sendErrorMsg(session, "Username and roomKey are required");
             closeSession(session);
         } else {
-            if (!handler.usernameExists(username)) {
+            handler = ChatRoomServlet.getHandlerForRoom(roomKey);
+            if (handler == null) {
+                sendErrorMsg(session, String.format("Room with key %s doesn't exist!", roomKey));
+                closeSession(session);
+            } else if (handler.usernameExists(username)) {
+                sendErrorMsg(session, String.format("Username %s already exists!", username));
+                closeSession(session);
+            } else {
                 String sessionId = session.getId();
                 broadcastMsgToAll(username, null, MessageType.JOINED);
 
                 handler.addSession(session);
                 handler.addUser(sessionId, new User(sessionId, username));
                 sendOnlineUsers(session, handler.getUsernames());
-            } else {
-                sendErrorMsg(session, "Username already exists!");
-                closeSession(session);
             }
         }
     }
 
     @OnClose
     public void close(Session session) {
-        String username = handler.getUsernameForId(session.getId());
-        handler.removeSession(session);
-        handler.removeUser(session.getId());
-        broadcastMsgToAll(username, null, MessageType.LEFT);
+        if (handler != null) {
+            String username = handler.getUsernameForId(session.getId());
+            handler.removeSession(session);
+            handler.removeUser(session.getId());
+            broadcastMsgToAll(username, null, MessageType.LEFT);
+        }
     }
 
     @OnError
@@ -90,7 +98,7 @@ public class ChatAppServer {
         }
     }
 
-    private void closeSession(Session session) {
+    public static void closeSession(Session session) {
         try {
             session.close();
         } catch (IOException e) {

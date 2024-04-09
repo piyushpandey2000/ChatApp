@@ -10,11 +10,22 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ChatAppSessionHandler {
-    private final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
-    private final Map<String, User> userSessionMap = Collections.synchronizedMap(new HashMap<>());
+public class ChatRoom {
+    private final String roomKey;
+    private final String creator;
+
+    private final Set<Session> sessions;
+    private final Map<String, User> userSessionMap;
     @Getter
-    private final Set<String> usernames = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String> usernames;
+
+    public ChatRoom(String roomKey, String creator) {
+        this.roomKey = roomKey;
+        this.creator = creator;
+        this.sessions = Collections.synchronizedSet(new HashSet<>());
+        this.userSessionMap = Collections.synchronizedMap(new HashMap<>());
+        this.usernames = Collections.synchronizedSet(new HashSet<>());
+    }
 
     public void addSession(Session session) {
         sessions.add(session);
@@ -47,5 +58,15 @@ public class ChatAppSessionHandler {
 
     public void sendMsgToAll(String msg) {
         sessions.forEach(session -> ChatAppServer.sendMsg(session, msg));
+    }
+
+    public void closeAll() {
+        for (Session session : sessions) {
+            ChatAppServer.closeSession(session);
+        }
+    }
+
+    public int getUserCount() {
+        return usernames.size();
     }
 }
