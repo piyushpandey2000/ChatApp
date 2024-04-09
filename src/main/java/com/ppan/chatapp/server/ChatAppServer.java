@@ -18,6 +18,8 @@ import java.util.logging.Logger;
 
 @ServerEndpoint("/webapp-server")
 public class ChatAppServer {
+    private final ChatAppSessionHandler handler = new ChatAppSessionHandler();
+
     @OnOpen
     public void open(Session session) {
         String username = session.getRequestParameterMap().get("username").get(0);
@@ -25,13 +27,13 @@ public class ChatAppServer {
             sendErrorMsg(session, "Username is required");
             closeSession(session);
         } else {
-            if (!ChatAppSessionHandler.getInstance().usernameExists(username)) {
+            if (!handler.usernameExists(username)) {
                 String sessionId = session.getId();
                 broadcastMsgToAll(username, null, MessageType.JOINED);
 
-                ChatAppSessionHandler.getInstance().addSession(session);
-                ChatAppSessionHandler.getInstance().addUser(sessionId, new User(sessionId, username));
-                sendOnlineUsers(session, ChatAppSessionHandler.getInstance().getUsernames());
+                handler.addSession(session);
+                handler.addUser(sessionId, new User(sessionId, username));
+                sendOnlineUsers(session, handler.getUsernames());
             } else {
                 sendErrorMsg(session, "Username already exists!");
                 closeSession(session);
@@ -41,9 +43,9 @@ public class ChatAppServer {
 
     @OnClose
     public void close(Session session) {
-        String username = ChatAppSessionHandler.getInstance().getUsernameForId(session.getId());
-        ChatAppSessionHandler.getInstance().removeSession(session);
-        ChatAppSessionHandler.getInstance().removeUser(session.getId());
+        String username = handler.getUsernameForId(session.getId());
+        handler.removeSession(session);
+        handler.removeUser(session.getId());
         broadcastMsgToAll(username, null, MessageType.LEFT);
     }
 
@@ -55,7 +57,7 @@ public class ChatAppServer {
 
     @OnMessage
     public void handleMessage(String message, Session session) {
-        String username = ChatAppSessionHandler.getInstance().getUsernameForId(session.getId());
+        String username = handler.getUsernameForId(session.getId());
         broadcastMsgToAll(username, message, MessageType.MESSAGE);
     }
 
@@ -64,7 +66,7 @@ public class ChatAppServer {
                 .append(Constants.MSG_TYPE_KEY, type.name());
         serializedMsg.put(Constants.MSG_KEY, message);
 
-        ChatAppSessionHandler.getInstance().sendMsgToAll(serializedMsg.toString());
+        handler.sendMsgToAll(serializedMsg.toString());
     }
 
     private void sendErrorMsg(Session session, String msg) {

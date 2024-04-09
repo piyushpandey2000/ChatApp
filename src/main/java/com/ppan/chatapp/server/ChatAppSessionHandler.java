@@ -2,9 +2,7 @@ package com.ppan.chatapp.server;
 
 import com.ppan.chatapp.model.User;
 import jakarta.websocket.Session;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,18 +10,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChatAppSessionHandler {
     private final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
     private final Map<String, User> userSessionMap = Collections.synchronizedMap(new HashMap<>());
     @Getter
     private final Set<String> usernames = Collections.synchronizedSet(new HashSet<>());
-
-    private static final ChatAppSessionHandler instance = new ChatAppSessionHandler();
-
-    public static ChatAppSessionHandler getInstance() {
-        return instance;
-    }
 
     public void addSession(Session session) {
         sessions.add(session);
