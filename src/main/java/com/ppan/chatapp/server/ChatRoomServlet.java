@@ -23,9 +23,12 @@ public class ChatRoomServlet extends HttpServlet {
         switch (req.getRequestURI()) {
             case "/create": {
                 String creator = req.getParameter(Constants.ChatRoom.CREATOR_KEY);
-                String key = generateRoomKey();
 
-                chatrooms.put(key, new ChatRoom(key, creator));
+                String key;
+                synchronized (chatrooms) {
+                    key = generateRoomKey();
+                    chatrooms.put(key, new ChatRoom(key, creator));
+                }
 
                 resp.getWriter().print(key);
                 break;

@@ -57,13 +57,14 @@ public class ChatRoom {
     }
 
     public void sendMsgToAll(String msg) {
-        sessions.forEach(session -> ChatAppServer.sendMsg(session, msg));
+        Session[] array = sessions.toArray(new Session[0]);
+        for (Session session : array) {
+            ChatAppServer.sendMsg(session, msg);
+        }
     }
 
     public void closeAll() {
-        for (Session session : sessions) {
-            ChatAppServer.closeSession(session);
-        }
+        sessions.forEach(ChatAppServer::closeSession);
     }
 
     public int getUserCount() {
